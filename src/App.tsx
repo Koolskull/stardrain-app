@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { mainnet } from 'viem/chains';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import { useAccount } from 'wagmi'; // Add this import
+import { ConnectButton } from '@rainbow-me/rainbowkit'; // Add this import
 
 function App() {
-  const { ready, authenticated, login, user } = usePrivy();
+  const { address, isConnected } = useAccount(); // Replace usePrivy with this
   const [hasNFT, setHasNFT] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (ready && authenticated && user?.wallet?.address) {
-      checkNFTHoldings(user.wallet.address);
+    if (isConnected && address) {
+      checkNFTHoldings(address);
+    } else {
+      setLoading(false); // If not connected, stop loading
     }
-  }, [ready, authenticated, user]);
+  }, [isConnected, address]);
 
-  const checkNFTHoldings = async (address: string) => {
+  const checkNFTHoldings = async (address: 0x${string}) => {
     setLoading(true);
     const client = createPublicClient({
       chain: mainnet,
@@ -30,34 +33,24 @@ function App() {
       address: nftContractAddress,
       abi,
       functionName: 'balanceOf',
-      args: [address as `0x${string}`],
+      args: [address],
     });
 
     setHasNFT(Number(balance) > 0);
     setLoading(false);
   };
 
-  if (!ready || loading) return <div>Loading...</div>;
-  if (!authenticated) return <button onClick={login}>Connect Wallet</button>;
+  if (loading) return
 
+    Loading...
+    ;
   return (
-    <div style={{ height: '100vh' }}>
-    {hasNFT ? (
-      <Canvas>
-      {/* Your R3F game scene here */}
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <mesh>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="hotpink" />
-      </mesh>
-      <OrbitControls />
-      </Canvas>
-    ) : (
-      <div>You need to hold our NFT to access the game!</div>
-    )}
-    </div>
-  );
-}
 
-export default App;
+    <connectbutton> {/* This replaces the <button onclick="{login}">Connect Wallet</button> */} </connectbutton>
+    {isConnected ? ( hasNFT ? ( <canvas> {/* Your R3F game scene here */} <ambientlight> <pointlight position="{[10," 10,="" 10]}=""> <mesh> <boxgeometry args="{[1," 1,="" 1]}=""> <meshstandardmaterial color="hotpink"> </meshstandardmaterial></boxgeometry></mesh> <orbitcontrols> </orbitcontrols></pointlight></ambientlight></canvas> ) : (
+      You need to hold our NFT to access the game!
+    ) ) : (
+      Please connect your wallet to continue.
+      {/* Optional message if not connected */} )}
+  ); }
+  export default App;
